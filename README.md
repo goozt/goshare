@@ -52,10 +52,11 @@ Open any of those addresses in a browser (mobile or desktop) to view the front-e
 
 ### CLI flags
 
-| Flag | Description       | Default                  |
-| ---- | ----------------- | ------------------------ |
-| `-d` | Shared directory  | `$HOME/Downloads/shared` |
-| `-p` | Port to listen on | `8080`                   |
+| Flag | Description                  | Default                  |
+| ---- | ---------------------------- | ------------------------ |
+| `-d` | Shared directory             | `$HOME/Downloads/shared` |
+| `-p` | Port to listen on            | `8080`                   |
+| `-v` | Print build version and exit | (none)                   |
 
 ### Browser client
 

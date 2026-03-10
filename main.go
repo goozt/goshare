@@ -29,6 +29,7 @@ var publicFS embed.FS
 
 var (
 	sharedDir string
+	version   = "1.0.0"
 	hub       = newHub()
 	upgrader  = websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool { return true },
@@ -384,7 +385,13 @@ func handleDownload(w http.ResponseWriter, r *http.Request) {
 func main() {
 	dirFlag := flag.String("d", "", "shared directory (default: $HOME/Downloads/shared)")
 	portFlag := flag.Int("p", 8080, "port to listen on")
+	versionFlag := flag.Bool("v", false, "print version and exit")
 	flag.Parse()
+
+	if *versionFlag {
+		fmt.Printf("goshare server v%s\n", version)
+		return
+	}
 
 	if *dirFlag != "" {
 		sharedDir = *dirFlag
