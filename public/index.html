@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/manifest.json">
+    <title>GoShare</title>
+    <style>
+        :root {
+            --bg-1: #0e9797;
+            --bg-2: #5d6ae1;
+            --glass: rgba(255, 255, 255, 0.16);
+            --glass-border: rgba(255, 255, 255, 0.32);
+            --ink: #053b45;
+            --ink-soft: #225a64;
+            --accent: #0a9396;
+            --accent-2: #005f73;
+            --danger: #ae2012;
+            --ok: #2a9d8f;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html {
+            background: var(--bg-1);
+        }
+
+        body {
+            margin: 0;
+            font-family: "Nunito", "Segoe UI", sans-serif;
+            color: var(--ink);
+            background:
+                /* radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.45), transparent 42%), */
+                /* radial-gradient(circle at 85% 15%, rgba(255, 255, 255, 0.2), transparent 40%), */
+                linear-gradient(180deg, var(--bg-1), var(--bg-2));
+            min-height: 100vh;
+            padding: 1rem;
+        }
+
+        .app {
+            max-width: 640px;
+            margin: 0 auto;
+            display: grid;
+            gap: 1rem;
+        }
+
+        .hero {
+            color: #ffffff;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            padding: 0.5rem 0.25rem;
+        }
+
+        .hero h1 {
+            margin: 0;
+            font-size: 1.9rem;
+            letter-spacing: 0.02em;
+        }
+
+        .hero p {
+            margin: 0.25rem 0 0;
+            opacity: 0.95;
+        }
+
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(31, 38, 135, 0.22);
+            padding: 1rem;
+        }
+
+        .card h2 {
+            margin: 0 0 0.8rem;
+            font-size: 1.05rem;
+            color: var(--ink);
+        }
+
+        .drop-zone {
+            border: 2px dashed rgba(5, 59, 69, 0.35);
+            border-radius: 14px;
+            min-height: 140px;
+            display: grid;
+            place-items: center;
+            text-align: center;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.22);
+            transition: border-color 0.2s ease, transform 0.2s ease, background 0.2s ease;
+        }
+
+        .drop-zone.dragover {
+            border-color: var(--accent-2);
+            background: rgba(255, 255, 255, 0.32);
+            transform: translateY(-2px);
+        }
+
+        .controls {
+            margin-top: 0.8rem;
+            display: flex;
+            gap: 0.65rem;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            border: 0;
+            border-radius: 12px;
+            min-height: 48px;
+            padding: 0.7rem 1rem;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            color: #fff;
+            background: linear-gradient(120deg, var(--accent), var(--accent-2));
+            box-shadow: 0 8px 18px rgba(0, 95, 115, 0.25);
+        }
+
+        .btn.secondary {
+            background: rgba(255, 255, 255, 0.42);
+            color: var(--ink);
+            box-shadow: none;
+            border: 1px solid rgba(5, 59, 69, 0.2);
+        }
+
+        .btn.danger {
+            background: rgba(174, 32, 18, 0.85);
+            box-shadow: none;
+        }
+
+        .progress {
+            margin-top: 0.75rem;
+            height: 12px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.55);
+            overflow: hidden;
+            display: none;
+        }
+
+        .progress>div {
+            height: 100%;
+            width: 0;
+            background: linear-gradient(90deg, #ee9b00, #ca6702);
+            transition: width 0.15s linear;
+        }
+
+        .meta {
+            margin-top: 0.5rem;
+            font-size: 0.84rem;
+            color: var(--ink-soft);
+            word-break: break-word;
+        }
+
+        .list {
+            margin: 0;
+            padding: 0;
+            list-style: none;
+            display: grid;
+            gap: 0.65rem;
+        }
+
+        .item {
+            background: rgba(255, 255, 255, 0.35);
+            border-radius: 12px;
+            padding: 0.75rem;
+            border: 1px solid rgba(255, 255, 255, 0.35);
+        }
+
+        .item-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .fname {
+            font-weight: 700;
+            word-break: break-all;
+        }
+
+        .fmeta {
+            font-size: 0.8rem;
+            color: var(--ink-soft);
+            margin-top: 0.2rem;
+        }
+
+        .item-actions {
+            margin-top: 0.55rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .file-progress {
+            margin-top: 0.5rem;
+            height: 8px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.45);
+            overflow: hidden;
+            display: none;
+        }
+
+        .file-progress>div {
+            height: 100%;
+            width: 0;
+            transition: width 0.15s linear;
+            background: linear-gradient(90deg, #0a9396, #005f73);
+        }
+
+        @media (min-width: 768px) {
+            body {
+                padding: 1.5rem;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <main class="app">
+        <section class="hero">
+            <h1>GoShare</h1>
+            <p>Quick local network file sharing from one page.</p>
+        </section>
+
+        <section class="card">
+            <h2>Upload Files</h2>
+            <div id="dropZone" class="drop-zone">
+                <div>
+                    <strong>Drop files here</strong>
+                    <div class="meta">or use the button below</div>
+                </div>
+            </div>
+            <div class="controls">
+                <input id="fileInput" type="file" multiple hidden>
+                <button id="pickBtn" class="btn" type="button">Pick Files</button>
+                <button id="refreshBtn" class="btn secondary" type="button">Refresh List</button>
+            </div>
+            <div id="uploadProgress" class="progress">
+                <div></div>
+            </div>
+            <div id="status" class="meta">Waiting for connection...</div>
+        </section>
+
+        <section class="card">
+            <h2>Shared Files</h2>
+            <ul id="fileList" class="list"></ul>
+        </section>
+    </main>
+
+    <script>
+        const state = {
+            clientId: "",
+            ws: null,
+            files: []
+        };
+
+        const statusEl = document.getElementById("status");
+        const uploadProgressEl = document.getElementById("uploadProgress");
+        const uploadProgressBar = uploadProgressEl.firstElementChild;
+        const dropZone = document.getElementById("dropZone");
+        const fileInput = document.getElementById("fileInput");
+        const pickBtn = document.getElementById("pickBtn");
+        const refreshBtn = document.getElementById("refreshBtn");
+        const fileList = document.getElementById("fileList");
+
+        function fmtBytes(bytes) {
+            if (bytes < 1024) return `${bytes} B`;
+            if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+            if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+            return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+        }
+
+        function setStatus(message) {
+            statusEl.textContent = message;
+        }
+
+        function wsURL() {
+            const proto = location.protocol === "https:" ? "wss:" : "ws:";
+            return `${proto}//${location.host}/ws`;
+        }
+
+        function showUploadProgress(pct) {
+            uploadProgressEl.style.display = "block";
+            uploadProgressBar.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+        }
+
+        function hideUploadProgress() {
+            uploadProgressBar.style.width = "0%";
+            uploadProgressEl.style.display = "none";
+        }
+
+        function fileProgressEl(filename) {
+            return document.querySelector(`.file-progress[data-file="${CSS.escape(filename)}"]`);
+        }
+
+        function updateFileProgress(filename, pct) {
+            const wrap = fileProgressEl(filename);
+            if (!wrap) return;
+            wrap.style.display = "block";
+            wrap.firstElementChild.style.width = `${Math.min(100, Math.max(0, pct))}%`;
+            if (pct >= 100) {
+                setTimeout(() => {
+                    wrap.style.display = "none";
+                    wrap.firstElementChild.style.width = "0%";
+                }, 600);
+            }
+        }
+
+        function connectWS() {
+            const ws = new WebSocket(wsURL());
+            state.ws = ws;
+
+            ws.onopen = () => setStatus("Connected. Ready to share files.");
+            ws.onclose = () => {
+                state.clientId = "";
+                setStatus("Connection lost. Reconnecting...");
+                setTimeout(connectWS, 1000);
+            };
+            ws.onerror = () => setStatus("WebSocket error.");
+            ws.onmessage = (event) => {
+                let msg;
+                try {
+                    msg = JSON.parse(event.data);
+                } catch {
+                    return;
+                }
+                if (msg.type === "connected" && msg.clientId) {
+                    state.clientId = msg.clientId;
+                    setStatus("Connected. Ready to share files.");
+                    return;
+                }
+                if (msg.type === "upload_progress") {
+                    showUploadProgress(msg.percent || 0);
+                    if (msg.filename) {
+                        setStatus(`Uploading ${msg.filename}: ${(msg.percent || 0).toFixed(0)}%`);
+                    }
+                    return;
+                }
+                if (msg.type === "upload_done") {
+                    showUploadProgress(100);
+                    setStatus(msg.filename ? `Upload done: ${msg.filename}` : "Upload completed.");
+                    setTimeout(() => hideUploadProgress(), 500);
+                    fetchFiles();
+                    return;
+                }
+                if (msg.type === "upload_error") {
+                    hideUploadProgress();
+                    setStatus(`Upload failed${msg.filename ? ` (${msg.filename})` : ""}: ${msg.error || "unknown error"}`);
+                    return;
+                }
+                if (msg.type === "download_progress" && msg.filename) {
+                    updateFileProgress(msg.filename, msg.percent || 0);
+                    return;
+                }
+                if (msg.type === "download_done" && msg.filename) {
+                    updateFileProgress(msg.filename, 100);
+                }
+            };
+        }
+
+        async function fetchFiles() {
+            const res = await fetch("/api/files", { cache: "no-store" });
+            if (!res.ok) {
+                throw new Error("Unable to list files");
+            }
+            state.files = await res.json();
+            renderFiles();
+        }
+
+        function renderFiles() {
+            fileList.innerHTML = "";
+            if (!state.files.length) {
+                const li = document.createElement("li");
+                li.className = "item";
+                li.textContent = "No files in shared folder yet.";
+                fileList.appendChild(li);
+                return;
+            }
+
+            for (const f of state.files) {
+                const li = document.createElement("li");
+                li.className = "item";
+                li.innerHTML = `
+                    <div class="item-top">
+                        <div>
+                            <div class="fname">${f.name}</div>
+                            <div class="fmeta">${fmtBytes(f.size)} • ${new Date(f.modified).toLocaleString()}</div>
+                        </div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn" data-action="download" data-file="${f.name}" type="button">Download</button>
+                        <button class="btn danger" data-action="delete" data-file="${f.name}" type="button">Delete</button>
+                    </div>
+                    <div class="file-progress" data-file="${f.name}"><div></div></div>
+                `;
+                fileList.appendChild(li);
+            }
+        }
+
+        async function uploadFiles(files) {
+            if (!files.length) return;
+            if (!state.clientId) {
+                setStatus("Not connected yet, retry in a second.");
+                return;
+            }
+
+            for (const file of files) {
+                const formData = new FormData();
+                formData.append("file", file);
+                showUploadProgress(0);
+                setStatus(`Uploading ${file.name}...`);
+
+                const res = await fetch(`/api/upload?clientId=${encodeURIComponent(state.clientId)}`, {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!res.ok) {
+                    hideUploadProgress();
+                    setStatus(`Upload failed: ${file.name}`);
+                    return;
+                }
+            }
+
+            await fetchFiles();
+            setStatus("All uploads completed.");
+            hideUploadProgress();
+        }
+
+        async function deleteFile(name) {
+            const res = await fetch(`/api/files/${encodeURIComponent(name)}`, { method: "DELETE" });
+            if (!res.ok) {
+                setStatus(`Delete failed: ${name}`);
+                return;
+            }
+            await fetchFiles();
+            setStatus(`Deleted ${name}`);
+        }
+
+        function downloadFile(name) {
+            if (!state.clientId) {
+                setStatus("Not connected yet, retry in a second.");
+                return;
+            }
+            updateFileProgress(name, 1);
+            window.location.href = `/api/download/${encodeURIComponent(name)}?clientId=${encodeURIComponent(state.clientId)}`;
+        }
+
+        pickBtn.addEventListener("click", () => fileInput.click());
+        refreshBtn.addEventListener("click", () => {
+            fetchFiles().then(() => setStatus("File list refreshed.")).catch(() => setStatus("Refresh failed."));
+        });
+
+        fileInput.addEventListener("change", () => {
+            uploadFiles([...fileInput.files]).catch((err) => setStatus(err.message));
+            fileInput.value = "";
+        });
+
+        ["dragenter", "dragover"].forEach((evt) => {
+            dropZone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.add("dragover");
+            });
+        });
+
+        ["dragleave", "drop"].forEach((evt) => {
+            dropZone.addEventListener(evt, (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                dropZone.classList.remove("dragover");
+            });
+        });
+
+        dropZone.addEventListener("drop", (e) => {
+            const files = [...(e.dataTransfer?.files || [])];
+            uploadFiles(files).catch((err) => setStatus(err.message));
+        });
+
+        fileList.addEventListener("click", (e) => {
+            const target = e.target;
+            if (!(target instanceof HTMLElement)) return;
+            const action = target.dataset.action;
+            const name = target.dataset.file;
+            if (!action || !name) return;
+
+            if (action === "download") {
+                downloadFile(name);
+            } else if (action === "delete") {
+                deleteFile(name).catch((err) => setStatus(err.message));
+            }
+        });
+
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("/sw.js").catch(() => {
+                    setStatus("Service worker registration failed.");
+                });
+            });
+        }
+
+        connectWS();
+        fetchFiles().catch(() => setStatus("Unable to fetch files."));
+    </script>
+</body>
+
+</html>
