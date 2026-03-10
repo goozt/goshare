@@ -14,6 +14,22 @@ GoShare is a tiny peer-to-peer file sharing web server written in Go. It exposes
 
 ## Getting started
 
+### Executable Binary
+
+Prebuilt `goshare` binaries are attached to every GitHub release. Download the archive for your platform from the [releases page](https://github.com/goozt/goshare/releases) (e.g. v1.0.0).
+
+You can also install the latest directly with `go install` or build from source as shown below.
+
+### Go installation
+
+```sh
+go install github.com/goozt/goshare@latest
+
+# or
+
+go install github.com/goozt/goshare@v1.0.0
+```
+
 ### Prerequisites
 
 - Go 1.16+ (modules-enabled)
