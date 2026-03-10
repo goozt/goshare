@@ -39,6 +39,7 @@ go run main.go
 ```
 
 When started it prints the URLs you can use from other machines on the same LAN:
+
 ```
 GoShare starting...
 Shared directory: /home/user/Downloads/shared
@@ -51,10 +52,10 @@ Open any of those addresses in a browser (mobile or desktop) to view the front-e
 
 ### CLI flags
 
-| Flag | Description | Default |
-|------|-------------|---------|
-| `-d` | Shared directory | `$HOME/Downloads/shared` |
-| `-p` | Port to listen on | `8080` |
+| Flag | Description       | Default                  |
+| ---- | ----------------- | ------------------------ |
+| `-d` | Shared directory  | `$HOME/Downloads/shared` |
+| `-p` | Port to listen on | `8080`                   |
 
 ### Browser client
 
@@ -84,7 +85,5 @@ This project is released under the MIT license.
 ```text
 MIT License
 
-<copyright holder>
+Copyright (c) 2026 Goozt
 ```
-
-Replace `<copyright holder>` with your name if you distribute this.
