@@ -1,0 +1,77 @@
+name: Release Go Binaries
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    name: Build Binaries
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        goos: [linux, windows, darwin]
+        goarch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.22"
+
+      - name: Build and Package
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          RELEASE_VERSION: ${{ github.ref_name }}
+        run: |
+          BIN_NAME="goshare"
+          [ "${{ matrix.goos }}" = "windows" ] && BIN_NAME="goshare.exe" 
+          go build -v -o "$BIN_NAME" main.go
+
+          mkdir -p dist
+
+          if [ "${{ matrix.goos }}" = "windows" ]; then
+            # For Windows, rename the actual file for the release
+            FINAL_NAME="goshare_${RELEASE_VERSION}-${{ matrix.goos }}-${{ matrix.goarch }}.exe"
+            mv "$BIN_NAME" "dist/$FINAL_NAME"
+          else
+            # For Unix, wrap the 'goshare' binary in a versioned tarball
+            ARCHIVE_NAME="goshare_${RELEASE_VERSION}-${{ matrix.goos }}-${{ matrix.goarch }}.tar.gz"
+            tar -czf "dist/$ARCHIVE_NAME" "$BIN_NAME"
+          fi
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binaries-${{ matrix.goos }}-${{ matrix.goarch }}
+          path: |
+            dist/*.tar.gz
+            dist/*.exe
+
+  release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: all-dist
+          pattern: binaries-*
+          merge-multiple: true
+
+      - name: Upload to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            all-dist/*.tar.gz
+            all-dist/*.exe
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
