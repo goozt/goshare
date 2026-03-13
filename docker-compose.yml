@@ -4,7 +4,7 @@ services:
     container_name: shareapp
     restart: unless-stopped
     volumes:
-      - goshare-appdata-data:/data
+      - goshare-appdata:/data
     labels:
       - "traefik.http.routers.shareapp.rule=Host(`share.app.n2h.me`)"
       - "traefik.http.services.shareapp.loadbalancer.server.port=8080"
