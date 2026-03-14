@@ -1,6 +1,7 @@
 package main
 
 import (
+	"compress/gzip"
 	"context"
 	"crypto/rand"
 	"embed"
@@ -140,6 +141,34 @@ func (cw *countingWriter) Write(p []byte) (n int, err error) {
 		}
 	}
 	return
+}
+
+type gzipResponseWriter struct {
+	http.ResponseWriter
+	gz *gzip.Writer
+}
+
+func (g *gzipResponseWriter) Write(b []byte) (int, error) { return g.gz.Write(b) }
+func (g *gzipResponseWriter) Flush() {
+	g.gz.Flush()
+	if f, ok := g.ResponseWriter.(http.Flusher); ok {
+		f.Flush()
+	}
+}
+
+func compress(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") ||
+			r.Header.Get("Upgrade") == "websocket" {
+			next.ServeHTTP(w, r)
+			return
+		}
+		w.Header().Set("Content-Encoding", "gzip")
+		w.Header().Del("Content-Length")
+		gz := gzip.NewWriter(w)
+		defer gz.Close()
+		next.ServeHTTP(&gzipResponseWriter{ResponseWriter: w, gz: gz}, r)
+	})
 }
 
 // recovery is a middleware that catches panics and returns 500.
@@ -422,7 +451,7 @@ func main() {
 
 	server := &http.Server{
 		Addr:    fmt.Sprintf("0.0.0.0:%d", *portFlag),
-		Handler: recovery(mux),
+		Handler: recovery(compress(mux)),
 	}
 
 	fmt.Println("GoShare starting...")
